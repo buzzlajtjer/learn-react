@@ -1,69 +1,106 @@
 import React, { Component } from 'react';
 import './App.css';
 import Person from './Person/Person';
+import Radium, { StyleRoot } from 'radium';
 
 class App extends Component {
   state = {
     persons: [
-      {name:'Christian', age: 28},
-      {name:'Diana', age: 26},
-      {name:'Carl', age: 25}
-    ]
+      {id: 'sfsdf', name:'Christian', age: 28},
+      {id: 'gfhfgh', name:'Diana', age: 26},
+      {id: 'ytruhgjhg', name:'Carl', age: 25}
+    ],
+    showPersons: false
   }
 
-  switchNameHandler = () => {
-    //console.log('Was clicked!');
-    // DON'T DO THIS => this.state.persons[0] = 'Crille';
+  nameChangedHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id;
+    });
+
+    const person = {
+      ...this.state.persons[personIndex]
+    };
+
+    person.name = event.target.value;
+
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+
     this.setState({
-      persons: [
-        {name:'Crille', age: 28},
-        {name:'Dianita', age: 26},
-        {name:'Calle C', age: 25}
-      ]
-    })
+      persons: persons
+    });
   }
 
-  nameChangedHandler = (event) => {
-    this.setState({
-      persons: [
-        {name:'Crille', age: 28},
-        {name:event.target.value, age: 26},
-        {name:'Calle C', age: 25}
-      ]
-    })
+  deletePersonHandler = (personIndex) => {
+    const personsArray = [...this.state.persons];
+    personsArray.splice(personIndex, 1);
+    this.setState({persons: personsArray})
   }
+
+  togglePersonsHandler = () => {
+    const doesShow = this.state.showPersons;
+    this.setState({showPersons: !doesShow});
+  } 
 
   render() {
 
     const style = {
-      backgroundColor: 'white',
+      backgroundColor: 'green',
+      color: 'white',
       font: 'inherit',
       border: '1px solid blue',
       padding: '8px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      ':hover':{
+        backgroundColor: 'lightgreen',
+        color: 'black'
+      }
     };
 
+    let personsHideAndShow = null;
+
+    if(this.state.showPersons){
+      personsHideAndShow = (
+        <div>
+          {this.state.persons.map((person, indexMan) => {
+            return <Person
+              click = {() => this.deletePersonHandler(indexMan)}
+              name = {person.name}
+              age = {person.age}
+              key={person.id}
+              changed={(event) => this.nameChangedHandler(event, person.id)}/>
+          })}
+        </div>
+      );
+      style.backgroundColor = 'red';
+      style[':hover'] = {
+        backgroundColor: 'salmon',
+        color: 'black'
+      }
+    }
+
+    let classes = [];
+    if(this.state.persons.length <= 2){
+      classes.push('red');
+    }
+    if(this.state.persons.length <=1){
+      classes.push('bold');
+    }
+
     return (
-      <div className="App">
-        <h1>Hi, I'm a React App</h1>
-        <p>This is actually really fucking cool!</p>
-        <button 
-          style={style}
-          onClick={this.switchNameHandler}>Switch Name</button>
-        <Person 
-          name={this.state.persons[0].name} 
-          age={this.state.persons[0].age}
-          click={this.switchNameHandler}>I'm a Web developer/Singer songwriter/Dog sitter</Person>
-        <Person 
-          name={this.state.persons[1].name} 
-          age={this.state.persons[1].age}
-          changed={this.nameChangedHandler}>I'm a Project Buyer</Person>
-        <Person 
-          name={this.state.persons[2].name} 
-          age={this.state.persons[2].age}>I'm a Musician</Person>
-      </div>
+      <StyleRoot>
+        <div className="App">
+          <h1>Hi, I'm a React App</h1>
+          <p className={classes.join(' ')}>I do stupid and unusable things, but 'm pretty cool and super powerful!</p>
+          <button 
+            style={style}
+            onClick={this.togglePersonsHandler}>Toggle Person</button>
+            {personsHideAndShow}
+        </div>
+      </StyleRoot>
     );
   }
 }
 
-export default App;
+export default Radium(App);
